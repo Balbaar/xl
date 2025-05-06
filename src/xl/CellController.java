@@ -77,11 +77,19 @@ public class CellController {
         return getCell(name).getValue();
     }
 
+    public boolean cellExists(String name) {
+        return cells.containsKey(name);
+    }
+
     public Map<String, Cell> getCells() {
         return cells;
     }
 
     public String getCellExpression(String name) {
+        if (!cellExists(name)) {
+            return "";
+        }
+
         return getCell(name).getExpression();
     }
 
@@ -101,8 +109,9 @@ public class CellController {
             cell.setExpression("", cells);
         }
 
-        //cells.clear();
         notifyAllCells();
+        cells.clear();
+        //observers.clear();
     }
 
     private void notifyAllCells() {

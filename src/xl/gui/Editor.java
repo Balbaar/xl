@@ -48,7 +48,7 @@ public class Editor extends JTextField implements Observer {
         // Update the editor's text when the selected cell changes
         String selectedCell = (String) arg;
         Cell cell = cellController.getCell(selectedCell);
-        setText(cell.getExpression());
+        setText(cellController.getCellExpression(selectedCell));
     }
 
     private void updateCellExpression() {
