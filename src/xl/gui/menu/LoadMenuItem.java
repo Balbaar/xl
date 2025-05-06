@@ -21,6 +21,11 @@ class LoadMenuItem extends OpenMenuItem {
             XLBufferedReader reader = new XLBufferedReader(path);
             Map<String, Cell> cellData = new HashMap<>();
             reader.load(cellData); // Load data into the map
+
+            // Clear existing cells first
+            xl.getCellController().clear(); // Add this method to CellController
+
+            // Load all cells
             for (Map.Entry<String, Cell> entry : cellData.entrySet()) {
                 xl.getCellController().setCellExpression(entry.getKey(), entry.getValue().getExpression());
             }

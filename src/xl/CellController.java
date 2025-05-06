@@ -89,4 +89,15 @@ public class CellController {
             observer.cellUpdated(cellName);
         }
     }
+
+    public void clear() {
+        cells.clear();
+        notifyAllCells();
+    }
+
+    private void notifyAllCells() {
+        for (String cellName : cells.keySet()) {
+            notifyObservers(cellName);
+        }
+    }
 }
