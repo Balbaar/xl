@@ -19,4 +19,8 @@ public class ColoredLabel extends JLabel {
         setBackground(color);
         setOpaque(true);
     }
+
+    public void setText(String text) {
+        super.setText(text);
+    }
 }

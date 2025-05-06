@@ -1,12 +1,10 @@
 package xl.gui;
 
-import static java.awt.BorderLayout.CENTER;
-import static java.awt.BorderLayout.NORTH;
-import static java.awt.BorderLayout.SOUTH;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import xl.CellController;
 import xl.gui.menu.XLMenuBar;
+import javax.swing.*;
+
+import static java.awt.BorderLayout.*;
 
 public class XL extends JFrame {
 
@@ -14,6 +12,9 @@ public class XL extends JFrame {
     private XLCounter counter;
     private StatusLabel statusLabel = new StatusLabel();
     private XLList xlList;
+
+    private CellController cellController = new CellController();
+    private SelectionModel selectionModel = new SelectionModel();
 
     public XL(XL oldXL) {
         this(oldXL.xlList, oldXL.counter);
@@ -25,9 +26,9 @@ public class XL extends JFrame {
         this.counter = counter;
         xlList.add(this);
         counter.increment();
-        JPanel statusPanel = new StatusPanel(statusLabel);
-        JPanel sheetPanel = new SheetPanel(ROWS, COLUMNS);
-        Editor editor = new Editor();
+        JPanel statusPanel = new StatusPanel(statusLabel, cellController, selectionModel);
+        JPanel sheetPanel = new SheetPanel(ROWS, COLUMNS, cellController, selectionModel);
+        Editor editor = new Editor(cellController, selectionModel);
         add(NORTH, statusPanel);
         add(CENTER, editor);
         add(SOUTH, sheetPanel);

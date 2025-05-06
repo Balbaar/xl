@@ -1,12 +1,14 @@
 package xl.gui;
 
+import xl.CellController;
+
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.WEST;
 
 public class SheetPanel extends BorderPanel {
 
-    public SheetPanel(int rows, int columns) {
+    public SheetPanel(int rows, int columns, CellController cellController, SelectionModel selectionModel) {
         add(WEST, new RowLabels(rows));
-        add(CENTER, new SlotLabels(rows, columns));
+        add(CENTER, new SlotLabels(rows, columns, cellController, selectionModel));
     }
 }
