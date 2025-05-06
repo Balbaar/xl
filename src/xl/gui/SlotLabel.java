@@ -47,10 +47,12 @@ public class SlotLabel extends ColoredLabel implements Observer {
                 setBackground(Color.WHITE); // Reset background for non-selected cells
                 double val = cellController.getCellValue(cellName);
                 //Check if the first character is "#"
-                if(val == 0.0) {
+                System.out.println(cellController.getCellExpression(cellName));
+                if(val == 0.0 && cellController.getCellExpression(cellName).equals("")) {
                     setText("");
+                    return;
                 }
-                else if(cellController.getCellExpression(cellName).charAt(0) == '#') {
+                if(cellController.getCellExpression(cellName).charAt(0) == '#') {
                     setText(cellController.getCellExpression(cellName));
                 }
                 else {
