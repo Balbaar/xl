@@ -39,6 +39,10 @@ public class XL extends JFrame {
         setVisible(true);
     }
 
+    public CellController getCellController() {
+        return cellController;
+    }
+
     public void rename(String title) {
         setTitle(title);
         xlList.setChanged();

@@ -1,7 +1,7 @@
 package xl.gui;
 
 import xl.CellController;
-
+import xl.gui.RowLabels;
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.WEST;
 

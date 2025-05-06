@@ -1,5 +1,7 @@
 package xl.util;
 
+import xl.Cell;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -12,16 +14,20 @@ public class XLBufferedReader extends BufferedReader {
         super(new FileReader(name));
     }
 
-    // TODO Change Object to something appropriate
-    public void load(Map<String, Object> map) {
+    public void load(Map<String, Cell> map) {
         try {
             while (ready()) {
                 String string = readLine();
                 int i = string.indexOf('=');
-                // TODO
+                if (i > 0) {
+                    String key = string.substring(0, i).trim(); // Extract key
+                    String value = string.substring(i + 1).trim(); // Extract value
+                    Cell cell = map.computeIfAbsent(key, Cell::new); // Get or create Cell
+                    cell.setExpression(value, map); // Set the expression
+                }
             }
         } catch (Exception e) {
-            throw new XLException(e.getMessage());
+            throw new XLException("Error loading file: " + e.getMessage());
         }
     }
 }
