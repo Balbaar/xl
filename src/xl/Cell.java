@@ -9,6 +9,7 @@ public class Cell {
     private String expression = "";
     private double value = 0.0;
     private Set<String> dependencies = new HashSet<>();
+    private CellStrategy strategy;
 
     public Cell(String name) {
         this.name = name;
@@ -22,32 +23,25 @@ public class Cell {
         return value;
     }
 
-    public void setExpression(String expression, Map<String, Cell> cells) {
-        this.expression = expression;
-        dependencies.clear();
-        // Parse the expression and update dependencies
-        // (Assume a simple parser for demonstration)
-        if (expression.matches("[A-Z][0-9]+")) {
-            dependencies.add(expression);
-        }
-        recalculateValue(cells);
-    }
-
-    public void recalculateValue(Map<String, Cell> cells) {
-        if (dependencies.isEmpty()) {
-            try {
-                value = Double.parseDouble(expression);
-            } catch (NumberFormatException e) {
-                value = 0.0; // Default value for invalid expressions
-            }
-        } else {
-            value = dependencies.stream()
-                    .mapToDouble(dep -> cells.getOrDefault(dep, new Cell(dep)).getValue())
-                    .sum(); // Example: sum of dependent cell values
-        }
+    public void setValue(double value) {
+        this.value = value;
     }
 
     public Set<String> getDependencies() {
         return dependencies;
+    }
+
+    public void setExpression(String expression, Map<String, Cell> cells) {
+        this.expression = expression;
+
+        // Choose strategy based on content
+        if (expression.startsWith("#")) {
+            strategy = new CommentStrategy();
+        } else {
+            strategy = new ExpressionStrategy();
+        }
+
+        // Process using the selected strategy
+        strategy.process(this, cells);
     }
 }

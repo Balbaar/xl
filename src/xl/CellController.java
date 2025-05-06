@@ -12,9 +12,24 @@ public class CellController {
 
     public void setCellExpression(String name, String expression) {
         Cell cell = getCell(name);
-        cell.setExpression(expression, cells);
-        notifyObservers(name);
-        recalculateDependencies(name);
+        String oldExpr = cell.getExpression();
+
+        // Only update if expression has changed
+        if (!expression.equals(oldExpr)) {
+            // Clear old dependencies first
+            for (Map.Entry<String, Cell> entry : cells.entrySet()) {
+                entry.getValue().getDependencies().remove(name);
+            }
+
+            // Set new expression which will trigger the appropriate strategy
+            cell.setExpression(expression, cells);
+
+            // Notify observers for this cell
+            notifyObservers(name);
+
+            // Update all cells that depend on this cell
+            updateDependentCells(name);
+        }
     }
 
     public double getCellValue(String name) {
@@ -25,12 +40,31 @@ public class CellController {
         return getCell(name).getExpression();
     }
 
-    private void recalculateDependencies(String name) {
-        for (Map.Entry<String, Cell> entry : cells.entrySet()) {
-            if (entry.getValue().getDependencies().contains(name)) {
-                entry.getValue().recalculateValue(cells);
-                notifyObservers(entry.getKey());
+    private void updateDependentCells(String changedCell) {
+        Set<String> processed = new HashSet<>();
+        Queue<String> toProcess = new LinkedList<>();
+        toProcess.add(changedCell);
+
+        while (!toProcess.isEmpty()) {
+            String currentCell = toProcess.poll();
+            if (processed.contains(currentCell)) {
+                continue;
             }
+
+            // Find all cells that depend on the current cell
+            for (Map.Entry<String, Cell> entry : cells.entrySet()) {
+                String cellName = entry.getKey();
+                Cell cell = entry.getValue();
+
+                if (cell.getDependencies().contains(currentCell)) {
+                    // Reprocess the cell using its strategy
+                    cell.setExpression(cell.getExpression(), cells);
+                    notifyObservers(cellName);
+                    toProcess.add(cellName);
+                }
+            }
+
+            processed.add(currentCell);
         }
     }
 

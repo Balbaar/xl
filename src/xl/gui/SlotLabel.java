@@ -31,7 +31,6 @@ public class SlotLabel extends ColoredLabel implements Observer {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                cellController.setCellExpression(cellName, ""); // Example: Clear expression on click
                 selectionModel.setSelectedCell(cellName);
             }
         });
@@ -43,8 +42,20 @@ public class SlotLabel extends ColoredLabel implements Observer {
             String selectedCell = (String) arg;
             if (cellName.equals(selectedCell)) {
                 setBackground(Color.YELLOW); // Highlight selected cell
+                setText(String.valueOf(cellController.getCellExpression(cellName)));
             } else {
                 setBackground(Color.WHITE); // Reset background for non-selected cells
+                double val = cellController.getCellValue(cellName);
+                //Check if the first character is "#"
+                if(val == 0.0) {
+                    setText("");
+                }
+                else if(cellController.getCellExpression(cellName).charAt(0) == '#') {
+                    setText(cellController.getCellExpression(cellName));
+                }
+                else {
+                    setText(String.valueOf(val));
+                }
             }
         }
     }
