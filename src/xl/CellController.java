@@ -14,21 +14,61 @@ public class CellController {
         Cell cell = getCell(name);
         String oldExpr = cell.getExpression();
 
-        // Only update if expression has changed
         if (!expression.equals(oldExpr)) {
-            // Clear old dependencies first
-            for (Map.Entry<String, Cell> entry : cells.entrySet()) {
-                entry.getValue().getDependencies().remove(name);
-            }
+            // Store cells that previously depended on this cell
+            Set<String> dependentCells = findCellsThatDependOn(name);
 
-            // Set new expression which will trigger the appropriate strategy
+            // Set new expression
             cell.setExpression(expression, cells);
 
-            // Notify observers for this cell
+            // Notify that this cell changed
             notifyObservers(name);
 
-            // Update all cells that depend on this cell
+            // Update cells that previously depended on this cell
+            for (String dependent : dependentCells) {
+                Cell depCell = getCell(dependent);
+                depCell.setExpression(depCell.getExpression(), cells);
+                notifyObservers(dependent);
+            }
+
+            // Update new dependent cells
             updateDependentCells(name);
+        }
+    }
+
+    private Set<String> findCellsThatDependOn(String cellName) {
+        Set<String> dependentCells = new HashSet<>();
+        for (Map.Entry<String, Cell> entry : cells.entrySet()) {
+            if (entry.getValue().getDependencies().contains(cellName)) {
+                dependentCells.add(entry.getKey());
+            }
+        }
+        return dependentCells;
+    }
+
+    private void updateDependentCells(String changedCell) {
+        Set<String> processed = new HashSet<>();
+        Queue<String> toProcess = new LinkedList<>();
+
+        // Find all cells that directly depend on the changed cell
+        Set<String> dependentCells = findCellsThatDependOn(changedCell);
+        toProcess.addAll(dependentCells);
+
+        while (!toProcess.isEmpty()) {
+            String currentCell = toProcess.poll();
+            if (processed.contains(currentCell)) {
+                continue;
+            }
+
+            Cell cell = getCell(currentCell);
+            cell.setExpression(cell.getExpression(), cells);
+            notifyObservers(currentCell);
+
+            // Add cells that depend on the current cell
+            Set<String> newDependents = findCellsThatDependOn(currentCell);
+            toProcess.addAll(newDependents);
+
+            processed.add(currentCell);
         }
     }
 
@@ -38,34 +78,6 @@ public class CellController {
 
     public String getCellExpression(String name) {
         return getCell(name).getExpression();
-    }
-
-    private void updateDependentCells(String changedCell) {
-        Set<String> processed = new HashSet<>();
-        Queue<String> toProcess = new LinkedList<>();
-        toProcess.add(changedCell);
-
-        while (!toProcess.isEmpty()) {
-            String currentCell = toProcess.poll();
-            if (processed.contains(currentCell)) {
-                continue;
-            }
-
-            // Find all cells that depend on the current cell
-            for (Map.Entry<String, Cell> entry : cells.entrySet()) {
-                String cellName = entry.getKey();
-                Cell cell = entry.getValue();
-
-                if (cell.getDependencies().contains(currentCell)) {
-                    // Reprocess the cell using its strategy
-                    cell.setExpression(cell.getExpression(), cells);
-                    notifyObservers(cellName);
-                    toProcess.add(cellName);
-                }
-            }
-
-            processed.add(currentCell);
-        }
     }
 
     public void addObserver(CellObserver observer) {

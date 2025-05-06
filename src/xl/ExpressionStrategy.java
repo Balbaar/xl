@@ -6,7 +6,9 @@ import xl.expr.ExprParser;
 import xl.util.XLException;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ExpressionStrategy implements CellStrategy {
     @Override
@@ -19,27 +21,25 @@ public class ExpressionStrategy implements CellStrategy {
             ExprParser parser = new ExprParser();
             Expr expr = parser.build(expression);
 
-
-            // Collect dependencies
-            expr.toString().chars()
-                    .filter(Character::isLetterOrDigit)
-                    .mapToObj(c -> String.valueOf((char) c))
-                    .filter(name -> name.matches("[A-Z][0-9]+"))
-                    .forEach(cell.getDependencies()::add);
-
-
-
-            // Calculate the value using the environment
-            double value = expr.value(new Environment() {
+            // Create a special environment to collect dependencies
+            Set<String> dependencies = new HashSet<>();
+            Environment depCollector = new Environment() {
                 @Override
                 public double value(String name) {
+                    dependencies.add(name);
                     return cells.getOrDefault(name, new Cell(name)).getValue();
                 }
-            });
+            };
 
+            // Calculate value and collect dependencies in one pass
+            double value = expr.value(depCollector);
+
+            // Update cell's dependencies and value
+            cell.getDependencies().addAll(dependencies);
             cell.setValue(value);
+
         } catch (IOException | XLException e) {
-            cell.setValue(0.0); // Default value for invalid expressions
+            cell.setValue(0.0);
         }
     }
 }

@@ -33,6 +33,8 @@ public class Cell {
 
     public void setExpression(String expression, Map<String, Cell> cells) {
         this.expression = expression;
+        //print dependendencies
+        System.out.println("Dependencies for " + name + ": " + dependencies);
 
         // Choose strategy based on content
         if (expression.startsWith("#")) {
