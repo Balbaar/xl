@@ -46,6 +46,7 @@ public class CellController {
         return dependentCells;
     }
 
+
     private void updateDependentCells(String changedCell) {
         Set<String> processed = new HashSet<>();
         Queue<String> toProcess = new LinkedList<>();
@@ -91,7 +92,12 @@ public class CellController {
     }
 
     public void clear() {
-        cells.clear();
+        for(String cellName : cells.keySet()) {
+            Cell cell = cells.get(cellName);
+            cell.setExpression("", cells);
+        }
+
+        //cells.clear();
         notifyAllCells();
     }
 
