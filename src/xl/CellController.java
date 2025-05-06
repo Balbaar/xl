@@ -7,11 +7,11 @@ public class CellController {
     private List<CellObserver> observers = new ArrayList<>();
 
     public Cell getCell(String name) {
-        return cells.computeIfAbsent(name, Cell::new);
+        return cells.get(name);
     }
 
     public void setCellExpression(String name, String expression) {
-        Cell cell = getCell(name);
+        Cell cell = cells.computeIfAbsent(name,Cell::new);
         String oldExpr = cell.getExpression();
 
         if (!expression.equals(oldExpr)) {
@@ -75,6 +75,10 @@ public class CellController {
 
     public double getCellValue(String name) {
         return getCell(name).getValue();
+    }
+
+    public Map<String, Cell> getCells() {
+        return cells;
     }
 
     public String getCellExpression(String name) {

@@ -1,9 +1,13 @@
 package xl.gui.menu;
 
 import java.io.FileNotFoundException;
+import java.util.Map;
 import javax.swing.JFileChooser;
+
+import xl.Cell;
 import xl.gui.StatusLabel;
 import xl.gui.XL;
+import xl.util.XLPrintStream;
 
 class SaveMenuItem extends OpenMenuItem {
 
@@ -12,7 +16,17 @@ class SaveMenuItem extends OpenMenuItem {
     }
 
     protected void action(String path) throws FileNotFoundException {
-        // TODO
+        if (!path.endsWith(".xl")) {
+            path += ".xl"; // Ensure the file has the correct extension
+        }
+
+        try (XLPrintStream printStream = new XLPrintStream(path)) {
+            Map<String, Cell> cells = xl.getCellController().getCells();
+            printStream.save(cells.entrySet()); // Save the cells
+            statusLabel.setText("File saved successfully.");
+        } catch (Exception e) {
+            statusLabel.setText("Error saving file: " + e.getMessage());
+        }
     }
 
     protected int openDialog(JFileChooser fileChooser) {
