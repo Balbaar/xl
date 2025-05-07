@@ -31,6 +31,7 @@ public class Editor extends JTextField implements Observer {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    System.out.println("Enter pressed in editor");
                     updateCellExpression();
                 }
             }
@@ -40,24 +41,26 @@ public class Editor extends JTextField implements Observer {
     private void updateCellExpression() {
         String selectedCell = selectionModel.getSelectedCell();
         if (selectedCell != null) {
-            if(cellController.cellExists(selectedCell)) {
-                // Update the cell expression in the controller
-                cellController.setCellExpression(selectedCell, getText());
-                System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
-            } else {
-                // If the cell doesn't exist, create it and set the expression
+            if(!cellController.cellExists(selectedCell)) {
+                // Create a new cell if it doesn't exist
                 cellController.createCell(selectedCell);
             }
+            // Update the cell expression in the controller
+            cellController.setCellExpression(selectedCell, getText());
+            System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
+
 
         }
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        // Update the editor's text when the selected cell changes
-        String selectedCell = (String) arg;
-        Cell cell = cellController.getCell(selectedCell);
-        setText(cellController.getCellExpression(selectedCell));
+        if (arg instanceof String[]) {
+            String[] cells = (String[]) arg;
+            String selectedCell = cells[1]; // The new selected cell
+            Cell cell = cellController.getCell(selectedCell);
+            setText(cellController.getCellExpression(selectedCell));
+        }
     }
 
 

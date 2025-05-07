@@ -12,6 +12,9 @@ public class Cell extends Observable implements Observer {
     private double value = 0.0;
     private CellStrategy strategy;
     private final List<Observer> customObservers = new ArrayList<>();
+    //!not good to keep a reference to all cells
+    //!Kom inte på något anant sätt
+    private Map<String, Cell> cells;
 
     public Cell(String name) {
         this.name = name;
@@ -32,19 +35,16 @@ public class Cell extends Observable implements Observer {
     public void setValue(double value) {
         this.value = value;
         setChanged();
-        notifyObservers(); // Notify dependents when value changes
+        notifyObservers(cells); // Notify dependents when value changes
     }
 
     public void setExpression(String expression, Map<String, Cell> cells) {
         this.expression = expression;
+        this.cells = cells;
 
         if (expression.isEmpty()) {
             return;
         }
-
-        // Remove this cell as an observer of previous dependencies
-        //deleteObservers();
-        //customObservers.clear();
 
         // Choose strategy based on content
         if (expression.startsWith("#")) {
@@ -58,7 +58,7 @@ public class Cell extends Observable implements Observer {
 
         // Notify dependents about the change
         setChanged();
-        notifyObservers();
+        notifyObservers(cells);
     }
 
     @Override
@@ -80,10 +80,15 @@ public class Cell extends Observable implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        // React to updates from cells this cell depends on
-        setExpression(expression, (Map<String, Cell>) arg);
-        setChanged();
-        notifyObservers(); // Notify dependents
-        System.out.println("Cell " + name + " updated due to dependency change.");
+        if (arg instanceof Map) {
+            @SuppressWarnings("unchecked")
+            Map<String, Cell> cells = (Map<String, Cell>) arg;
+            setExpression(expression, cells);
+            setChanged();
+            notifyObservers(cells); // Pass the cells map to dependents
+            System.out.println("Cell " + name + " updated due to dependency change.");
+        } else {
+            throw new IllegalArgumentException("Expected a Map<String, Cell> as argument.");
+        }
     }
 }

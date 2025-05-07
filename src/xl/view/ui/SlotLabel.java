@@ -31,14 +31,18 @@ public class SlotLabel extends ColoredLabel implements Observer {
             @Override
             public void cellUpdated(String updatedCellName) {
                 if (cellName.equals(updatedCellName)) {
+                    System.out.println("Cell " + cellName + " updated");
                     updateDisplay();
                 }
             }
         });
 
+
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                System.out.println("SlotLabel clicked: " + cellName);
                 selectionModel.setSelectedCell(cellName);
             }
         });
@@ -47,6 +51,7 @@ public class SlotLabel extends ColoredLabel implements Observer {
     }
 
     private void updateDisplay() {
+        System.out.println("Updating display for cell: " + cellName);
         boolean isSelected = cellName.equals(selectionModel.getSelectedCell());
         if (isSelected) {
             setBackground(Color.YELLOW);
@@ -66,8 +71,11 @@ public class SlotLabel extends ColoredLabel implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (o instanceof SelectionModel) {
-            updateDisplay();
+        if (arg instanceof String[]) {
+            String[] cells = (String[]) arg;
+            if (cellName.equals(cells[0]) || cellName.equals(cells[1])) {
+                updateDisplay();
+            }
         }
     }
 }

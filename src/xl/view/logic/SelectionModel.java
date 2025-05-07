@@ -11,10 +11,11 @@ public class SelectionModel extends Observable {
 
     public void setSelectedCell(String cell) {
         if (!cell.equals(selectedCell)) {
+            String oldCell = selectedCell;
             this.selectedCell = cell;
             setChanged();
-            notifyObservers(cell);
-            System.out.println("Selected cell: " + cell);
+            notifyObservers(new String[]{oldCell, cell}); // Notify with old and new cells
+            System.out.println("Selected cell changed from: " + oldCell + " to: " + cell);
         }
     }
 }

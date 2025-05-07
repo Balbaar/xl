@@ -26,14 +26,17 @@ public class CellController {
         // Register this cell as an observer of its dependencies
         registerDependencies(cell, expression);
 
-        notifyObservers(name);
+
         updateDependentCells(name);
+
 
         // If the expression is empty, remove the cell
         if(expression.isEmpty()) {
             cells.remove(name);
         }
+        notifyObservers(name);
         System.out.println(cells);
+
     }
 
     private void updateDependentCells(String changedCell) {
@@ -56,8 +59,8 @@ public class CellController {
             // Update the cell's value
             cell.setExpression(cell.getExpression(), cells);
 
-            // Notify observers
-            notifyObservers(currentCell);
+
+
 
             // Add dependents to the queue
             for (Observer observer : cell.getObservers()) {
@@ -65,8 +68,11 @@ public class CellController {
                     toProcess.add(((Cell) observer).getName());
                 }
             }
-
             processed.add(currentCell);
+
+            // Notify observers with the changed cell
+            cell.notifyObservers(changedCell);
+            notifyAllCells();
         }
     }
 
