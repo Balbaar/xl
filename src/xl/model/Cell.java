@@ -9,6 +9,7 @@ public class Cell {
     private String expression = "";
     private double value = 0.0;
     private Set<String> dependencies = new HashSet<>();
+    private Set<String> dependents = new HashSet<>();
     private CellStrategy strategy;
 
     public Cell(String name) {
@@ -31,10 +32,23 @@ public class Cell {
         return dependencies;
     }
 
+    public Set<String> getDependents() {
+        return dependents;
+    }
+
+    public void addDependent(String cellName) {
+        dependents.add(cellName);
+    }
+
+    public void removeDependent(String cellName) {
+        dependents.remove(cellName);
+    }
     public void setExpression(String expression, Map<String, Cell> cells) {
         this.expression = expression;
         //print dependendencies
         System.out.println("Dependencies for " + name + ": " + dependencies);
+        //Print dependents
+        System.out.println("Dependents for " + name + ": " + dependents);
 
         // Choose strategy based on content
         if (expression.startsWith("#")) {

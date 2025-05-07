@@ -10,53 +10,49 @@ public class CellController {
     private List<CellObserver> observers = new ArrayList<>();
 
     public Cell getCell(String name) {
-        return cells.get(name);
+        return cells.computeIfAbsent(name, Cell::new);
     }
 
     public void setCellExpression(String name, String expression) {
-        Cell cell = cells.computeIfAbsent(name,Cell::new);
+        Cell cell = getCell(name);
         String oldExpr = cell.getExpression();
 
+        //If the expression is empty remove the cell
+        if (expression.isEmpty()) {
+            for (String dep : cell.getDependencies()) {
+                Cell depCell = getCell(dep);
+                depCell.removeDependent(name);
+            }
+            cells.remove(name);
+
+        }
+
         if (!expression.equals(oldExpr)) {
-            // Store cells that previously depended on this cell
-            Set<String> dependentCells = findCellsThatDependOn(name);
-
-            // Set new expression
-            cell.setExpression(expression, cells);
-
-            // Notify that this cell changed
-            notifyObservers(name);
-
-            // Update cells that previously depended on this cell
-            for (String dependent : dependentCells) {
-                Cell depCell = getCell(dependent);
-                depCell.setExpression(depCell.getExpression(), cells);
-                notifyObservers(dependent);
+            // Remove this cell from the dependents of its old dependencies
+            for (String oldDep : cell.getDependencies()) {
+                Cell depCell = getCell(oldDep);
+                depCell.removeDependent(name);
             }
 
-            // Update new dependent cells
+            // Set new expression and collect new dependencies
+            cell.setExpression(expression, cells);
+
+            // Add this cell to the dependents of its new dependencies
+            for (String newDep : cell.getDependencies()) {
+                Cell depCell = getCell(newDep);
+                depCell.addDependent(name);
+            }
+
+            // Notify dependents of this cell
             updateDependentCells(name);
         }
     }
 
-    private Set<String> findCellsThatDependOn(String cellName) {
-        Set<String> dependentCells = new HashSet<>();
-        for (Map.Entry<String, Cell> entry : cells.entrySet()) {
-            if (entry.getValue().getDependencies().contains(cellName)) {
-                dependentCells.add(entry.getKey());
-            }
-        }
-        return dependentCells;
-    }
-
-
     private void updateDependentCells(String changedCell) {
-        Set<String> processed = new HashSet<>();
         Queue<String> toProcess = new LinkedList<>();
+        Set<String> processed = new HashSet<>();
 
-        // Find all cells that directly depend on the changed cell
-        Set<String> dependentCells = findCellsThatDependOn(changedCell);
-        toProcess.addAll(dependentCells);
+        toProcess.add(changedCell);
 
         while (!toProcess.isEmpty()) {
             String currentCell = toProcess.poll();
@@ -65,13 +61,18 @@ public class CellController {
             }
 
             Cell cell = getCell(currentCell);
+            if (cell == null) {
+                continue;
+            }
+
+            // Update the cell's value
             cell.setExpression(cell.getExpression(), cells);
+
+            // Notify observers
             notifyObservers(currentCell);
 
-            // Add cells that depend on the current cell
-            Set<String> newDependents = findCellsThatDependOn(currentCell);
-            toProcess.addAll(newDependents);
-
+            // Add dependents to the queue
+            toProcess.addAll(cell.getDependents());
             processed.add(currentCell);
         }
     }
