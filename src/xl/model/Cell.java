@@ -1,19 +1,16 @@
 package xl.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import xl.model.CellStrategy;
+import xl.model.CommentStrategy;
+import xl.model.ExpressionStrategy;
+
+import java.util.*;
 
 public class Cell extends Observable implements Observer {
     private String name;
     private String expression = "";
     private double value = 0.0;
     private CellStrategy strategy;
-    private final List<Observer> customObservers = new ArrayList<>();
-    //!not good to keep a reference to all cells
-    //!Kom inte på något anant sätt
     private Map<String, Cell> cells;
 
     public Cell(String name) {
@@ -34,11 +31,10 @@ public class Cell extends Observable implements Observer {
 
     public void setValue(double value) {
         this.value = value;
+        System.out.println("Setting value of " + name + " to " + value);
         setChanged();
-        notifyObservers(cells); // Notify dependents when value changes
+        notifyObservers(); // Notify dependents when value changes
     }
-
-
 
     public void setExpression(String expression, Map<String, Cell> cells) {
         this.expression = expression;
@@ -46,6 +42,16 @@ public class Cell extends Observable implements Observer {
 
         if (expression.isEmpty()) {
             return;
+        }
+
+        // Clear existing observers
+        deleteObservers();
+
+        for (String dependency : parseDependencies(expression)) {
+            Cell dependentCell = cells.get(dependency);
+            if (dependentCell != null) {
+                dependentCell.addObserver(this); // Register this cell as an observer
+            }
         }
 
         // Choose strategy based on content
@@ -60,37 +66,28 @@ public class Cell extends Observable implements Observer {
 
         // Notify dependents about the change
         setChanged();
-        notifyObservers(cells);
+        notifyObservers();
     }
 
-    @Override
-    public void addObserver(Observer o) {
-        super.addObserver(o);
-        customObservers.add(o);
-        System.out.println("Observer added to cell " + name + ": " + o);
-    }
-
-    @Override
-    public void deleteObserver(Observer o) {
-        super.deleteObserver(o);
-        customObservers.remove(o);
-    }
-
-    public List<Observer> getObservers() {
-        return new ArrayList<>(customObservers);
+    private List<String> parseDependencies(String expression) {
+        List<String> dependencies = new ArrayList<>();
+        String[] tokens = expression.split("[^A-Za-z0-9]");
+        for (String token : tokens) {
+            if (token.matches("[A-Z][0-9]+")) {
+                dependencies.add(token);
+            }
+        }
+        return dependencies;
     }
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg instanceof Map) {
-            @SuppressWarnings("unchecked")
-            Map<String, Cell> cells = (Map<String, Cell>) arg;
-            setExpression(expression, cells);
+        System.out.println("Cell " + name + " updated by " + o);
+        if (strategy != null) {
+            strategy.process(this, cells); // ✅ Just re-evaluate using the strategy
             setChanged();
-            notifyObservers(cells); // Pass the cells map to dependents
-            System.out.println("Cell " + name + " updated due to dependency change.");
-        } else {
-            throw new IllegalArgumentException("Expected a Map<String, Cell> as argument.");
+            notifyObservers(); // Notify cells that depend on this one
         }
     }
+
 }

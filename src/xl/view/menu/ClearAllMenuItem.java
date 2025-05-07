@@ -17,6 +17,6 @@ class ClearAllMenuItem extends JMenuItem implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        cellController.clear();
+        //cellController.clear();
     }
 }
