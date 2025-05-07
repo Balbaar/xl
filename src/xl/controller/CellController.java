@@ -10,7 +10,8 @@ public class CellController {
     private List<CellObserver> observers = new ArrayList<>();
 
     public Cell getCell(String name) {
-        return cells.computeIfAbsent(name, Cell::new);
+        return cells.get(name);
+        //return cells.computeIfAbsent(name, Cell::new);
     }
 
     public void setCellExpression(String name, String expression) {
@@ -27,6 +28,12 @@ public class CellController {
 
         notifyObservers(name);
         updateDependentCells(name);
+
+        // If the expression is empty, remove the cell
+        if(expression.isEmpty()) {
+            cells.remove(name);
+        }
+        System.out.println(cells);
     }
 
     private void updateDependentCells(String changedCell) {
@@ -60,6 +67,12 @@ public class CellController {
             }
 
             processed.add(currentCell);
+        }
+    }
+
+    public void createCell(String name) {
+        if (!cellExists(name)) {
+            cells.put(name, new Cell(name));
         }
     }
 

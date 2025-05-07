@@ -40,8 +40,15 @@ public class Editor extends JTextField implements Observer {
     private void updateCellExpression() {
         String selectedCell = selectionModel.getSelectedCell();
         if (selectedCell != null) {
-            cellController.setCellExpression(selectedCell, getText());
-            System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
+            if(cellController.cellExists(selectedCell)) {
+                // Update the cell expression in the controller
+                cellController.setCellExpression(selectedCell, getText());
+                System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
+            } else {
+                // If the cell doesn't exist, create it and set the expression
+                cellController.createCell(selectedCell);
+            }
+
         }
     }
 
