@@ -1,19 +1,24 @@
 package xl.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
+import java.util.Observable;
+import java.util.Observer;
 
-public class Cell {
+public class Cell extends Observable implements Observer {
     private String name;
     private String expression = "";
     private double value = 0.0;
-    private Set<String> dependencies = new HashSet<>();
-    private Set<String> dependents = new HashSet<>();
     private CellStrategy strategy;
+    private final List<Observer> customObservers = new ArrayList<>();
 
     public Cell(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getExpression() {
@@ -26,29 +31,20 @@ public class Cell {
 
     public void setValue(double value) {
         this.value = value;
+        setChanged();
+        notifyObservers(); // Notify dependents when value changes
     }
 
-    public Set<String> getDependencies() {
-        return dependencies;
-    }
-
-    public Set<String> getDependents() {
-        return dependents;
-    }
-
-    public void addDependent(String cellName) {
-        dependents.add(cellName);
-    }
-
-    public void removeDependent(String cellName) {
-        dependents.remove(cellName);
-    }
     public void setExpression(String expression, Map<String, Cell> cells) {
         this.expression = expression;
-        //print dependendencies
-        System.out.println("Dependencies for " + name + ": " + dependencies);
-        //Print dependents
-        System.out.println("Dependents for " + name + ": " + dependents);
+
+        if (expression.isEmpty()) {
+            return;
+        }
+
+        // Remove this cell as an observer of previous dependencies
+        //deleteObservers();
+        //customObservers.clear();
 
         // Choose strategy based on content
         if (expression.startsWith("#")) {
@@ -59,5 +55,35 @@ public class Cell {
 
         // Process using the selected strategy
         strategy.process(this, cells);
+
+        // Notify dependents about the change
+        setChanged();
+        notifyObservers();
+    }
+
+    @Override
+    public void addObserver(Observer o) {
+        super.addObserver(o);
+        customObservers.add(o);
+        System.out.println("Observer added to cell " + name + ": " + o);
+    }
+
+    @Override
+    public void deleteObserver(Observer o) {
+        super.deleteObserver(o);
+        customObservers.remove(o);
+    }
+
+    public List<Observer> getObservers() {
+        return new ArrayList<>(customObservers);
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        // React to updates from cells this cell depends on
+        setExpression(expression, (Map<String, Cell>) arg);
+        setChanged();
+        notifyObservers(); // Notify dependents
+        System.out.println("Cell " + name + " updated due to dependency change.");
     }
 }

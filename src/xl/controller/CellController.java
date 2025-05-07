@@ -15,37 +15,18 @@ public class CellController {
 
     public void setCellExpression(String name, String expression) {
         Cell cell = getCell(name);
-        String oldExpr = cell.getExpression();
 
-        //If the expression is empty remove the cell
-        if (expression.isEmpty()) {
-            for (String dep : cell.getDependencies()) {
-                Cell depCell = getCell(dep);
-                depCell.removeDependent(name);
-            }
-            cells.remove(name);
+        // Remove this cell as an observer of its previous dependencies
+        cell.deleteObservers();
 
-        }
+        // Parse the expression and register dependencies
+        cell.setExpression(expression, cells);
 
-        if (!expression.equals(oldExpr)) {
-            // Remove this cell from the dependents of its old dependencies
-            for (String oldDep : cell.getDependencies()) {
-                Cell depCell = getCell(oldDep);
-                depCell.removeDependent(name);
-            }
+        // Register this cell as an observer of its dependencies
+        registerDependencies(cell, expression);
 
-            // Set new expression and collect new dependencies
-            cell.setExpression(expression, cells);
-
-            // Add this cell to the dependents of its new dependencies
-            for (String newDep : cell.getDependencies()) {
-                Cell depCell = getCell(newDep);
-                depCell.addDependent(name);
-            }
-
-            // Notify dependents of this cell
-            updateDependentCells(name);
-        }
+        notifyObservers(name);
+        updateDependentCells(name);
     }
 
     private void updateDependentCells(String changedCell) {
@@ -72,9 +53,35 @@ public class CellController {
             notifyObservers(currentCell);
 
             // Add dependents to the queue
-            toProcess.addAll(cell.getDependents());
+            for (Observer observer : cell.getObservers()) {
+                if (observer instanceof Cell) {
+                    toProcess.add(((Cell) observer).getName());
+                }
+            }
+
             processed.add(currentCell);
         }
+    }
+
+
+    private void registerDependencies(Cell cell, String expression) {
+        for (String dependency : parseDependencies(expression)) {
+            Cell dependentCell = getCell(dependency);
+            dependentCell.addObserver(cell); // Register the dependency
+        }
+    }
+
+    private List<String> parseDependencies(String expression) {
+        // Extract cell references (e.g., A1, B2) from the expression
+        List<String> dependencies = new ArrayList<>();
+        String[] tokens = expression.split("[^A-Za-z0-9]");
+        for (String token : tokens) {
+            if (token.matches("[A-Z][0-9]+")) {
+                dependencies.add(token);
+            }
+        }
+        System.out.println("Dependencies for expression '" + expression + "': " + dependencies);
+        return dependencies;
     }
 
     public double getCellValue(String name) {
@@ -108,14 +115,13 @@ public class CellController {
     }
 
     public void clear() {
-        for(String cellName : cells.keySet()) {
+        for (String cellName : cells.keySet()) {
             Cell cell = cells.get(cellName);
             cell.setExpression("", cells);
         }
 
         notifyAllCells();
         cells.clear();
-        //observers.clear();
     }
 
     private void notifyAllCells() {

@@ -13,7 +13,6 @@ import java.util.Set;
 public class ExpressionStrategy implements CellStrategy {
     @Override
     public void process(Cell cell, Map<String, Cell> cells) {
-        cell.getDependencies().clear();
         String expression = cell.getExpression();
 
         try {
@@ -21,25 +20,26 @@ public class ExpressionStrategy implements CellStrategy {
             ExprParser parser = new ExprParser();
             Expr expr = parser.build(expression);
 
-            // Create a special environment to collect dependencies
-            Set<String> dependencies = new HashSet<>();
-            Environment depCollector = new Environment() {
+            // Create a special environment
+            Environment env = new Environment() {
                 @Override
                 public double value(String name) {
-                    dependencies.add(name);
-                    return cells.getOrDefault(name, new Cell(name)).getValue();
+                    Cell dependentCell = cells.get(name);
+                    if (dependentCell != null) {
+                        return dependentCell.getValue();
+                    } else {
+                        throw new XLException("Cell " + name + " does not exist.");
+                    }
                 }
             };
+            // Evaluate the expression
 
-            // Calculate value and collect dependencies in one pass
-            double value = expr.value(depCollector);
-
-            // Update cell's dependencies and value
-            cell.getDependencies().addAll(dependencies);
+            double value = expr.value(env);
             cell.setValue(value);
 
-        } catch (IOException | XLException e) {
-            cell.setValue(0.0);
+
+    } catch (IOException e) {
+            throw new XLException("Error parsing expression: " + expression);
         }
     }
 }

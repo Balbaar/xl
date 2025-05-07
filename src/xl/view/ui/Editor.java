@@ -8,6 +8,8 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.Color;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -24,24 +26,23 @@ public class Editor extends JTextField implements Observer {
         // Observe selection changes
         selectionModel.addObserver(this);
 
-        // Listen for text changes in the editor
-        getDocument().addDocumentListener(new DocumentListener() {
-
+        // Add a KeyListener to detect ENTER key press
+        addKeyListener(new KeyAdapter() {
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateCellExpression();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateCellExpression();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateCellExpression();
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    updateCellExpression();
+                }
             }
         });
+    }
+
+    private void updateCellExpression() {
+        String selectedCell = selectionModel.getSelectedCell();
+        if (selectedCell != null) {
+            cellController.setCellExpression(selectedCell, getText());
+            System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
+        }
     }
 
     @Override
@@ -52,11 +53,5 @@ public class Editor extends JTextField implements Observer {
         setText(cellController.getCellExpression(selectedCell));
     }
 
-    private void updateCellExpression() {
-        String selectedCell = selectionModel.getSelectedCell();
-        if (selectedCell != null) {
-            cellController.setCellExpression(selectedCell, getText());
-            System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
-        }
-    }
+
 }
