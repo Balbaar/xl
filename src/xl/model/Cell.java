@@ -38,6 +38,8 @@ public class Cell extends Observable implements Observer {
         notifyObservers(cells); // Notify dependents when value changes
     }
 
+
+
     public void setExpression(String expression, Map<String, Cell> cells) {
         this.expression = expression;
         this.cells = cells;

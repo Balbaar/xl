@@ -22,13 +22,29 @@ class LoadMenuItem extends OpenMenuItem {
             Map<String, Cell> cellData = new HashMap<>();
             reader.load(cellData); // Load data into the map
 
+            System.out.println(cellData);
+
             // Clear existing cells first
             xl.getCellController().clear(); // Add this method to CellController
 
-            // Load all cells
+            // Add all the cells, onlt its name
             for (Map.Entry<String, Cell> entry : cellData.entrySet()) {
-                xl.getCellController().setCellExpression(entry.getKey(), entry.getValue().getExpression());
+                System.out.println(entry);
+                String cellName = entry.getKey();
+                xl.getCellController().createCell(cellName); // create a new cell
             }
+
+            // Set the expression for each cell
+            for (Map.Entry<String, Cell> entry : cellData.entrySet()) {
+                System.out.println(entry.getKey());
+                String cellName = entry.getKey();
+                String expression = entry.getValue().getExpression();
+                xl.getCellController().setCellExpression(cellName, expression); // Set the expression
+            }
+
+            xl.getCellController().notifyAllCells();
+
+
             statusLabel.setText("File loaded successfully.");
         } catch (Exception e) {
             statusLabel.setText("Error loading file: " + e.getMessage());

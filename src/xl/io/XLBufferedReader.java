@@ -17,19 +17,23 @@ public class XLBufferedReader extends BufferedReader {
 
     public void load(Map<String, Cell> map) {
         try {
-            while (ready()) {
-                String string = readLine();
-                int i = string.indexOf('=');
-                if (i > 0) {
-                    String key = string.substring(0, i).trim(); // Extract key
-                    String value = string.substring(i + 1).trim(); // Extract value
-                    Cell cell = map.computeIfAbsent(key, Cell::new); // Get or create Cell
-                    cell.setExpression(value, map); // Set the expression
-
+            String line;
+            while ((line = readLine()) != null) {
+                // Split the line into cell name and expression
+                String[] parts = line.split("=", 2);
+                if (parts.length != 2) {
+                    throw new XLException("Invalid line format: " + line);
                 }
+
+                String cellName = parts[0].trim();
+                String expression = parts[1].trim();
+
+                // Create or update the cell in the map
+                Cell cell = map.computeIfAbsent(cellName, Cell::new);
+                cell.setExpression(expression, map);
             }
         } catch (Exception e) {
-            throw new XLException("Error loading file: " + e.getMessage());
+
         }
     }
 }

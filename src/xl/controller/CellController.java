@@ -59,9 +59,6 @@ public class CellController {
             // Update the cell's value
             cell.setExpression(cell.getExpression(), cells);
 
-
-
-
             // Add dependents to the queue
             for (Observer observer : cell.getObservers()) {
                 if (observer instanceof Cell) {
@@ -115,6 +112,7 @@ public class CellController {
         return cells;
     }
 
+
     public String getCellExpression(String name) {
         if (!cellExists(name)) {
             return "";
@@ -143,7 +141,7 @@ public class CellController {
         cells.clear();
     }
 
-    private void notifyAllCells() {
+    public void notifyAllCells() {
         for (String cellName : cells.keySet()) {
             notifyObservers(cellName);
         }
