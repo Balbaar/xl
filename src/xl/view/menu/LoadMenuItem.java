@@ -6,6 +6,7 @@ import javax.swing.JFileChooser;
 
 import xl.model.Cell;
 import xl.model.Sheet;
+import xl.view.logic.SelectionModel;
 import xl.view.ui.StatusLabel;
 import xl.view.XL;
 import xl.io.XLBufferedReader;
@@ -69,6 +70,7 @@ class LoadMenuItem extends OpenMenuItem {
             }
 
             sheet.notifyAllCells();
+            xl.getSelectionModel().updateSlotLabels();
             statusLabel.setText("File loaded successfully.");
         } catch (Exception e) {
             statusLabel.setText("Error loading file: " + e.getMessage());

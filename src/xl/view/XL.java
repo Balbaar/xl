@@ -50,6 +50,10 @@ public class XL extends JFrame {
         return sheet;
     }
 
+    public SelectionModel getSelectionModel() {
+        return selectionModel;
+    }
+
     public void rename(String title) {
         setTitle(title);
         xlList.setChanged();
