@@ -18,4 +18,10 @@ public class SelectionModel extends Observable {
             System.out.println("Selected cell changed from: " + oldCell + " to: " + cell);
         }
     }
+
+    public void updateSlotLabels() {
+        setChanged();
+        notifyObservers(new String[]{selectedCell, selectedCell}); // Notify with the same cell
+        System.out.println("Slot labels updated for cell: " + selectedCell);
+    }
 }

@@ -58,6 +58,7 @@ public class SlotLabel extends ColoredLabel implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
+        //System.out.println("SlotLabel update called");
         updateDisplay();
     }
 }

@@ -43,11 +43,12 @@ public class Editor extends JTextField implements Observer {
                 // Create a new cell if it doesn't exist
                 sheet.createCell(selectedCell);
             }
-            // Update the cell expression in the controller
+            // Update the cell expression in the sheet
             sheet.setCellExpression(selectedCell, getText());
             System.out.println("Updated cell " + selectedCell + " with expression: " + getText());
 
             selectionModel.setSelectedCell(selectedCell);
+            selectionModel.updateSlotLabels();
         }
     }
 
