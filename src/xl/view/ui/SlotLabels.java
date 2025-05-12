@@ -1,6 +1,6 @@
 package xl.view.ui;
 
-import xl.controller.CellController;
+import xl.model.Sheet;
 import xl.view.logic.SelectionModel;
 
 import javax.swing.*;
@@ -11,7 +11,7 @@ import java.util.List;
 public class SlotLabels extends GridPanel {
     private List<SlotLabel> labelList;
 
-    public SlotLabels(int rows, int cols, CellController cellController, SelectionModel selectionModel) {
+    public SlotLabels(int rows, int cols, Sheet sheet, SelectionModel selectionModel) {
         super(rows + 1, cols);
         labelList = new ArrayList<>(rows * cols);
 
@@ -23,7 +23,7 @@ public class SlotLabels extends GridPanel {
         for (int row = 1; row <= rows; row++) {
             for (char ch = 'A'; ch < 'A' + cols; ch++) {
                 String cellName = ch + String.valueOf(row);
-                SlotLabel label = new SlotLabel(cellName, cellController, selectionModel);
+                SlotLabel label = new SlotLabel(cellName, sheet, selectionModel);
                 add(label);
                 selectionModel.addObserver(label);
 

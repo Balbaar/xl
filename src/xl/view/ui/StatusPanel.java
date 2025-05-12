@@ -1,6 +1,6 @@
 package xl.view.ui;
 
-import xl.controller.CellController;
+import xl.model.Sheet;
 import xl.view.logic.SelectionModel;
 
 import static java.awt.BorderLayout.CENTER;
@@ -8,7 +8,7 @@ import static java.awt.BorderLayout.WEST;
 
 public class StatusPanel extends BorderPanel {
 
-    public StatusPanel(StatusLabel statusLabel, CellController cellController, SelectionModel selectionModel) {
+    public StatusPanel(StatusLabel statusLabel, Sheet sheet, SelectionModel selectionModel) {
         CurrentLabel currentLabel = new CurrentLabel();
 
         selectionModel.addObserver(currentLabel);

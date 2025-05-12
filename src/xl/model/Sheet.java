@@ -1,11 +1,8 @@
-package xl.controller;
-
-import xl.model.Cell;
-import xl.model.CellObserver;
+package xl.model;
 
 import java.util.*;
 
-public class CellController {
+public class Sheet {
     private final Map<String, Cell> cells = new HashMap<>();
     private final List<CellObserver> observers = new ArrayList<>();
 

@@ -21,7 +21,7 @@ class SaveMenuItem extends OpenMenuItem {
         }
 
         try (XLPrintStream printStream = new XLPrintStream(path)) {
-            Map<String, Cell> cells = xl.getCellController().getCells();
+            Map<String, Cell> cells = xl.getSheet().getCells();
             printStream.save(cells.entrySet()); // Save the cells
             statusLabel.setText("File saved successfully.");
         } catch (Exception e) {

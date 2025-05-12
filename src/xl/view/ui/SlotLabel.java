@@ -1,6 +1,7 @@
 package xl.view.ui;
 
-import xl.controller.CellController;
+import xl.model.Cell;
+import xl.model.Sheet;
 import xl.view.logic.SelectionModel;
 
 import java.awt.Color;
@@ -12,15 +13,15 @@ import java.util.Observer;
 
 public class SlotLabel extends ColoredLabel implements Observer {
     private final String cellName;
-    private final CellController cellController;
+    private final Sheet sheet;
     private final SelectionModel selectionModel;
     private static final int WIDTH = 100;
     private static final int HEIGHT = 25;
 
-    public SlotLabel(String cellName, CellController cellController, SelectionModel selectionModel) {
+    public SlotLabel(String cellName, Sheet sheet, SelectionModel selectionModel) {
         super("", Color.WHITE, RIGHT);
         this.cellName = cellName;
-        this.cellController = cellController;
+        this.sheet = sheet;
         this.selectionModel = selectionModel;
 
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -33,6 +34,7 @@ public class SlotLabel extends ColoredLabel implements Observer {
             }
         });
 
+
         updateDisplay();
     }
 
@@ -40,16 +42,16 @@ public class SlotLabel extends ColoredLabel implements Observer {
         boolean isSelected = cellName.equals(selectionModel.getSelectedCell());
         if (isSelected) {
             setBackground(Color.YELLOW);
-            setText(cellController.getCellExpression(cellName));
+            setText(sheet.getCellExpression(cellName));
         } else {
             setBackground(Color.WHITE);
-            String expression = cellController.getCellExpression(cellName);
+            String expression = sheet.getCellExpression(cellName);
             if (expression.isEmpty()) {
                 setText("");
             } else if (expression.startsWith("#")) {
                 setText(expression);
             } else {
-                setText(String.valueOf(cellController.getCellValue(cellName)));
+                setText(String.valueOf(sheet.getCellValue(cellName)));
             }
         }
     }

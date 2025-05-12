@@ -33,7 +33,6 @@ public class ExpressionStrategy implements CellStrategy {
                 }
             };
             // Evaluate the expression
-
             double value = expr.value(env);
             cell.setValue(value);
 
