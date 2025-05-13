@@ -13,6 +13,7 @@ public class CellController {
         return cells.get(name);
     }
 
+    //Set expression for a cell
     public void setCellExpression(String name, String expression) {
         Cell cell = cells.computeIfAbsent(name,Cell::new);
         String oldExpr = cell.getExpression();
