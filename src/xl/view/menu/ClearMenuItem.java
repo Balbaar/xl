@@ -2,28 +2,21 @@ package xl.view.menu;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import xl.view.logic.SelectionModel;
-import xl.model.Sheet;
-
-import javax.swing.*;
+import javax.swing.JMenuItem;
+import xl.controller.SheetController;
 
 class ClearMenuItem extends JMenuItem implements ActionListener {
 
-    private final Sheet sheet;
-    private final SelectionModel selectionModel;
+    private final SheetController controller;
 
-    public ClearMenuItem(Sheet sheet, SelectionModel selectionModel) {
+    public ClearMenuItem(SheetController controller) {
         super("Clear");
-        this.sheet = sheet;
-        this.selectionModel = selectionModel;
+        this.controller = controller;
         addActionListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String selectedCell = selectionModel.getSelectedCell();
-        if (selectedCell != null) {
-            sheet.setCellExpression(selectedCell, ""); // Clear the cell's expression
-        }
+        controller.clearSelectedCell();
     }
 }

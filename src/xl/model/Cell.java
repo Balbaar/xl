@@ -36,7 +36,7 @@ public class Cell extends Observable implements Observer {
         notifyObservers();
     }
 
-    public void setExpression(String expression, Map<String, Cell> cells) {
+    public void setExpression(String expression, Map<String, Cell> cells) throws XLException {
         String oldExpression = this.expression;
         double oldValue = this.value;
         List<Cell> oldDependencies = new ArrayList<>(this.dependencies);
@@ -45,49 +45,33 @@ public class Cell extends Observable implements Observer {
         this.cells = cells;
         clearDependencies();
 
-        if (expression.isEmpty()) {
-            return;
+        if (expression.isEmpty()) return;
+
+        // Parse and register dependencies
+        List<String> dependencyNames = parseDependencies(expression);
+        for (String dependencyName : dependencyNames) {
+            Cell dependency = cells.computeIfAbsent(dependencyName, Cell::new);
+            dependency.addObserver(this);
+            dependencies.add(dependency);
         }
 
-        try {
-            // Parse and register dependencies
-            List<String> dependencyNames = parseDependencies(expression);
-            for (String dependencyName : dependencyNames) {
-                Cell dependency = cells.computeIfAbsent(dependencyName, Cell::new);
-                dependency.addObserver(this);
-                dependencies.add(dependency);
-            }
+        // Check for circular dependencies
+        new BombStrategy().process(this, cells);  // Can bubble up exception
 
-            // Check for circular dependencies
-            new Bomb().process(this, cells);
-
-            //Choose strategy based on input
-            if (expression.startsWith("#")) {
-                strategy = new CommentStrategy();
-            } else {
-                strategy = new ExpressionStrategy();
-            }
-
-            strategy.process(this, cells);
-            setChanged();
-            notifyObservers();
-
-        } catch (XLException e) {
-            // Rollback
-            this.expression = oldExpression;
-            this.value = oldValue;
-            clearDependencies();
-            this.dependencies.addAll(oldDependencies);
-
-            for (Cell dep : oldDependencies) {
-                dep.addObserver(this);
-            }
-
-            setChanged();
-            notifyObservers();
-            System.err.println("Failed to set expression for " + name + ": " + e.getMessage());
+        // Choose strategy based on input
+        if (expression.startsWith("#")) {
+            strategy = new CommentStrategy();
+        } else {
+            strategy = new ExpressionStrategy();
         }
+
+        // Evaluate expression
+        strategy.process(this, cells); // Can bubble up exception
+
+        setChanged();
+        notifyObservers();
     }
+
 
 
 

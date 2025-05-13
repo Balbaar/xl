@@ -4,7 +4,7 @@ import xl.util.XLException;
 
 import java.util.*;
 
-public class Bomb implements CellStrategy {
+public class BombStrategy implements CellStrategy {
 
     @Override
     public void process(Cell cell, Map<String, Cell> cells) {

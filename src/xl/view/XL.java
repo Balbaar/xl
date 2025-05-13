@@ -1,5 +1,6 @@
 package xl.view;
 
+import xl.controller.SheetController;
 import xl.model.Sheet;
 import xl.view.logic.SelectionModel;
 import xl.view.logic.XLCounter;
@@ -22,6 +23,7 @@ public class XL extends JFrame {
 
     private Sheet sheet = new Sheet();
     private SelectionModel selectionModel = new SelectionModel();
+    private SheetController sheetController = new SheetController(sheet, selectionModel, statusLabel);
 
     public XL(XL oldXL) {
         this(oldXL.xlList, oldXL.counter);
@@ -35,20 +37,17 @@ public class XL extends JFrame {
         counter.increment();
         JPanel statusPanel = new StatusPanel(statusLabel, sheet, selectionModel);
         JPanel sheetPanel = new SheetPanel(ROWS, COLUMNS, sheet, selectionModel);
-        Editor editor = new Editor(sheet, selectionModel);
+        Editor editor = new Editor(sheetController, selectionModel);
         add(NORTH, statusPanel);
         add(CENTER, editor);
         add(SOUTH, sheetPanel);
-        setJMenuBar(new XLMenuBar(this, xlList, statusLabel, sheet, selectionModel));
+        setJMenuBar(new XLMenuBar(this, xlList, statusLabel, sheetController, selectionModel));
         pack();
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
         setVisible(true);
     }
 
-    public Sheet getSheet() {
-        return sheet;
-    }
 
     public SelectionModel getSelectionModel() {
         return selectionModel;
@@ -57,6 +56,13 @@ public class XL extends JFrame {
     public void rename(String title) {
         setTitle(title);
         xlList.setChanged();
+    }
+    public Sheet getSheet() {
+        return sheet;
+    }
+
+    public SheetController getSheetController() {
+        return sheetController;
     }
 
     public static void main(String[] args) {

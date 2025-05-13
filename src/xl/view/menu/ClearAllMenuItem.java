@@ -1,22 +1,23 @@
 package xl.view.menu;
+import xl.controller.SheetController;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
-import xl.model.Sheet;
+
 
 class ClearAllMenuItem extends JMenuItem implements ActionListener {
 
-    private final Sheet sheet;
+    private final SheetController controller;
 
-    public ClearAllMenuItem(Sheet sheet) {
+    public ClearAllMenuItem(SheetController controller) {
         super("Clear all");
-        this.sheet = sheet;
+        this.controller = controller;
         addActionListener(this);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        sheet.clear();
+        controller.clearAllCells();
     }
 }
